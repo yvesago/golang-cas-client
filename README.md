@@ -1,12 +1,17 @@
 Go CAS Client
 =============
 
-How to request a Service Ticket
--------------------------------
+Forked from : github.com/lucasuyezu/golang-cas-client
+
+WIP to test Jasig CAS server
+
+
+How to request a Service Ticket on REST API
+-------------------------------------------
 
     import (
       "fmt"
-      "github.com/lucasuyezu/cas"
+      "github.com/yvesago/golang-cas-client"
     )
 
     func main() {
@@ -22,7 +27,7 @@ How to validate a Service Ticket
 
     import (
       "fmt"
-      "github.com/lucasuyezu/cas"
+      "github.com/yvesago/golang-cas-client"
     )
 
     func main() {

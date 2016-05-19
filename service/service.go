@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/lucasuyezu/golang-cas-client/util"
+	"github.com/yvesago/golang-cas-client/util"
 	"strings"
 )
 
