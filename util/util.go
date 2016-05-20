@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"time"
 )
 
 func GetResponseHeader(url, key string, params map[string]string) (string, error) {
-	client := httpClient()
+	client := httpClient("")
 	response, err := client.PostForm(url, mapToUrlValues(params))
 
 	if err != nil {
@@ -42,8 +44,8 @@ func getElementBy(attname string, id string, n *html.Node) (element *html.Node, 
 	return
 }
 
-func GetResponseForm(urlbase string, params map[string]string, authparams map[string]string) (*http.Client, string, error) {
-	client := httpClient()
+func GetResponseForm(urlbase string, params map[string]string, authparams map[string]string, ip string) (*http.Client, string, error) {
+	client := httpClient(ip)
 	loginurl, _ := url.Parse(urlbase + "/login")
 	parameters := url.Values{}
 	parameters.Add("service", params["service"])
@@ -118,7 +120,7 @@ func GetResponseForm(urlbase string, params map[string]string, authparams map[st
 }
 
 func GetResponseBody(url string, params map[string]string) (string, error) {
-	client := httpClient()
+	client := httpClient("")
 	response, err := client.PostForm(url, mapToUrlValues(params))
 	if err != nil {
 		return "", err
@@ -135,9 +137,31 @@ func GetResponseBody(url string, params map[string]string) (string, error) {
 	return string(body), nil
 }
 
-func httpClient() *http.Client {
+func httpClient(ip string) *http.Client {
 	cookieJar, _ := cookiejar.New(nil)
-	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	var transport *http.Transport
+	if ip != "" {
+		localAddr, err := net.ResolveIPAddr("ip", ip)
+		if err != nil {
+			panic(err)
+		}
+
+		localTCPAddr := net.TCPAddr{
+			IP: localAddr.IP,
+		}
+
+		d := net.Dialer{
+			LocalAddr: &localTCPAddr,
+			Timeout:   10 * time.Second,
+			KeepAlive: 10 * time.Second,
+		}
+		transport = &http.Transport{
+			Dial:            d.Dial,
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	} else {
+		transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	}
 	return &http.Client{Transport: transport, Jar: cookieJar}
 }
 

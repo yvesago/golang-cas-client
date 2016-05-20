@@ -13,10 +13,10 @@ func New(server, username, password string) CasClientConfig {
 	return CasClientConfig{server, username, password}
 }
 
-func (self CasClientConfig) RequestLoginPage(service string) (*http.Client, string, error) {
+func (self CasClientConfig) RequestLoginPage(service string, ip string) (*http.Client, string, error) {
 	paramsauth := map[string]string{"username": self.Username, "password": self.Password}
 	params := map[string]string{"service": service}
-	return util.GetResponseForm(self.Server, params, paramsauth)
+	return util.GetResponseForm(self.Server, params, paramsauth, ip)
 }
 
 func (self CasClientConfig) RequestServiceTicket(service string) (string, error) {
