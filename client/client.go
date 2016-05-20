@@ -1,6 +1,9 @@
 package client
 
-import "github.com/yvesago/golang-cas-client/util"
+import (
+	"github.com/yvesago/golang-cas-client/util"
+	"net/http"
+)
 
 type CasClientConfig struct {
 	Server, Username, Password string
@@ -10,7 +13,7 @@ func New(server, username, password string) CasClientConfig {
 	return CasClientConfig{server, username, password}
 }
 
-func (self CasClientConfig) RequestLoginPage(service string) (string, error) {
+func (self CasClientConfig) RequestLoginPage(service string) (*http.Client, string, error) {
 	paramsauth := map[string]string{"username": self.Username, "password": self.Password}
 	params := map[string]string{"service": service}
 	return util.GetResponseForm(self.Server, params, paramsauth)

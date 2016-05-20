@@ -42,7 +42,7 @@ func getElementBy(attname string, id string, n *html.Node) (element *html.Node, 
 	return
 }
 
-func GetResponseForm(urlbase string, params map[string]string, authparams map[string]string) (string, error) {
+func GetResponseForm(urlbase string, params map[string]string, authparams map[string]string) (*http.Client, string, error) {
 	client := httpClient()
 	loginurl, _ := url.Parse(urlbase + "/login")
 	parameters := url.Values{}
@@ -53,12 +53,12 @@ func GetResponseForm(urlbase string, params map[string]string, authparams map[st
 	response, err := client.Get(loginurl.String())
 	//fmt.Println(response)
 	if err != nil {
-		return "", err
+		return client, "", err
 	}
 
 	if response.StatusCode != 200 {
 		errMsg := fmt.Sprintf("response should be 200 but is: %d", response.StatusCode)
-		return "", errors.New(errMsg)
+		return client, "", errors.New(errMsg)
 	}
 
 	body := response.Body
@@ -93,21 +93,28 @@ func GetResponseForm(urlbase string, params map[string]string, authparams map[st
 	authparams["auto"] = "true"
 	authparams["_eventId"] = "submit"
 	authparams["execution"] = exec
-	response2, _ := client.PostForm(loginurl.String(), mapToUrlValues(authparams))
+	response2, err := client.PostForm(loginurl.String(), mapToUrlValues(authparams))
+	if err != nil {
+		return client, "", err
+	}
+	if response2.StatusCode != 200 {
+		errMsg := fmt.Sprintf("response should be 200 but is: %d", response2.StatusCode)
+		return client, "", errors.New(errMsg)
+	}
+
 	//	fmt.Println(response2)
 
 	// Third: on success, client is redirected to test service which put User header
-	// TODO return client
 	header := response2.Header.Get("User")
-	fmt.Println(client.Jar.Cookies(loginurl))
+	//	fmt.Println(client.Jar.Cookies(loginurl))
 	/*	body2, _ := ioutil.ReadAll(response2.Body)
 		defer response2.Body.Close()
 		fmt.Println(string(body2))*/
 	if header == "" {
-		return "", errors.New("Header: User not found")
+		return client, "", errors.New("Header: User not found")
 	}
 
-	return header, nil
+	return client, header, nil
 }
 
 func GetResponseBody(url string, params map[string]string) (string, error) {
