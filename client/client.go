@@ -19,6 +19,11 @@ func (self CasClientConfig) RequestLoginPage(service string, ip string) (*http.C
 	return util.GetResponseForm(self.Server, params, paramsauth, ip)
 }
 
+func (self CasClientConfig) RequestSt(client *http.Client, service string) (string, error) {
+	params := map[string]string{"service": service}
+	return util.GetSt(self.Server+"/login", client, params)
+}
+
 func (self CasClientConfig) RequestServiceTicket(service string) (string, error) {
 	tgt, err := self.requestTgtLocation()
 	if err != nil {

@@ -44,6 +44,27 @@ func getElementBy(attname string, id string, n *html.Node) (element *html.Node, 
 	return
 }
 
+func GetSt(urlbase string, client *http.Client, params map[string]string) (string, error) {
+	loginurl, _ := url.Parse(urlbase + "/login")
+	parameters := url.Values{}
+	parameters.Add("service", params["service"])
+	loginurl.RawQuery = parameters.Encode()
+
+	// First: GET login
+	response, err := client.Get(loginurl.String())
+	//fmt.Println(response)
+	if err != nil {
+		return "ERROR", err
+	}
+	// XXX WIP to make test with a dedicated service wich put this header
+	header := response.Header.Get("User")
+	if header == "" {
+		return "", errors.New("Header: User not found")
+	}
+
+	return header, err
+}
+
 func GetResponseForm(urlbase string, params map[string]string, authparams map[string]string, ip string) (*http.Client, string, error) {
 	client := httpClient(ip)
 	loginurl, _ := url.Parse(urlbase + "/login")
@@ -106,6 +127,7 @@ func GetResponseForm(urlbase string, params map[string]string, authparams map[st
 
 	//	fmt.Println(response2)
 
+	// XXX WIP to make test with a dedicated service wich put this header
 	// Third: on success, client is redirected to test service which put User header
 	header := response2.Header.Get("User")
 	//	fmt.Println(client.Jar.Cookies(loginurl))
