@@ -21,7 +21,7 @@ func (self CasClientConfig) RequestLoginPage(service string, ip string) (*http.C
 
 func (self CasClientConfig) RequestSt(client *http.Client, service string) (string, error) {
 	params := map[string]string{"service": service}
-	return util.GetSt(self.Server+"/login", client, params)
+	return util.GetSt(self.Server, client, params)
 }
 
 func (self CasClientConfig) RequestServiceTicket(service string) (string, error) {
